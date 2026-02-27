@@ -193,4 +193,23 @@ const updateAllData2 = async (req, res) => {
   }
 };
 
-module.exports = { updateAllData2 };
+const setPendingStatus = async (req, res) => {
+  try {
+    const [result] = await pool.query(
+      "UPDATE vehicles SET cron_status='Pending'"
+    );
+    
+    console.log(`✅ Updated ${result.affectedRows} vehicles to Pending status`);
+    
+    return res.json({
+      success: true,
+      message: "All vehicles set to Pending status",
+      count: result.affectedRows,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+module.exports = { updateAllData2, setPendingStatus };
