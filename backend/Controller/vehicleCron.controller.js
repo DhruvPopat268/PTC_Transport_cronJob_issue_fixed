@@ -23,7 +23,7 @@ async function getDVSAAccessToken() {
   }
 }
 
-export const updateAllData2 = async (req, res) => {
+const updateAllData2 = async (req, res) => {
   const { from, to } = req.params;
 
   try {
@@ -196,3 +196,5 @@ export const updateAllData2 = async (req, res) => {
     return res.status(500).json({ success: false, error: error.message });
   }
 };
+
+module.exports = { updateAllData2 };
