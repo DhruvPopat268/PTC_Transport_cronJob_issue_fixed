@@ -28,6 +28,8 @@ const updateAllData2 = async (req, res) => {
     const query = "SELECT * FROM vehicles WHERE cron_status IN ('Pending', 'Failed')";
     const [vehicles] = await pool.query(query);
 
+    console.log(`\n🚀 Starting cron job for ${vehicles.length} vehicles...\n`);
+
     const apiKey2 = "dmVdeybS8M99rT3PrZ6iw8VZvP5gR6la3wSy2Mld";
     const apiUrl2 = "https://history.mot.api.gov.uk/v1/trade/vehicles/registration";
 
@@ -46,6 +48,7 @@ const updateAllData2 = async (req, res) => {
           // 🔐 Get DVSA Access Token
           const accessToken = await getDVSAAccessToken();
           if (!accessToken) {
+            console.log(`❌ ${registrationNumber} - Failed: Token generation failed`);
             await pool.query("UPDATE vehicles SET cron_status='Failed' WHERE id=?", [
               vehicle.id,
             ]);
@@ -63,6 +66,7 @@ const updateAllData2 = async (req, res) => {
           const resp = response.data;
 
           if (!resp || !resp.registration) {
+            console.log(`❌ ${registrationNumber} - Failed: No data returned from API`);
             await pool.query("UPDATE vehicles SET cron_status='Failed' WHERE id=?", [
               vehicle.id,
             ]);
@@ -167,8 +171,10 @@ const updateAllData2 = async (req, res) => {
               }
             }
           }
+
+          console.log(`✅ ${registrationNumber} - Completed: Successfully updated`);
         } catch (err) {
-          console.error("FAILED:", registrationNumber, err.message);
+          console.log(`❌ ${registrationNumber} - Failed: ${err.message}`);
           await pool.query(
             "UPDATE vehicles SET cron_status='Failed' WHERE id=?",
             [vehicle.id]
