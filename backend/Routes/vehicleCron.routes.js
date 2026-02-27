@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { updateAllData2 } = require("../controllers/vehicleCron.controller");
+const { updateAllData2 } = require("../Controller/vehicleCron.controller");
 
 router.get("/update-all-data/:from?/:to?", updateAllData2);
 
