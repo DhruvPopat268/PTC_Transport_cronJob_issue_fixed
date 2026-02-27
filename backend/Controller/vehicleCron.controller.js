@@ -94,15 +94,15 @@ const updateAllData2 = async (req, res) => {
             ]
           );
 
-          // 🔗 Update vehicleDetails (if exists)
+          // 🔗 Update vehicle_details (if exists)
           const [details] = await pool.query(
-            "SELECT * FROM vehicleDetails WHERE registrationNumber=? LIMIT 1",
+            "SELECT * FROM vehicle_details WHERE registrationNumber=? LIMIT 1",
             [registrationNumber]
           );
 
           if (details.length > 0) {
             await pool.query(
-              "UPDATE vehicleDetails SET vehicle_id=? WHERE id=?",
+              "UPDATE vehicle_details SET vehicle_id=? WHERE id=?",
               [vehicle.id, details[0].id]
             );
           }
