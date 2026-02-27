@@ -24,18 +24,9 @@ async function getDVSAAccessToken() {
 }
 
 const updateAllData2 = async (req, res) => {
-  const { from, to } = req.params;
-
   try {
-    let query = "SELECT * FROM vehicles WHERE cron_status IN ('Pending', 'Failed')";
-    let params = [];
-
-    if (from && to) {
-      query += " AND id BETWEEN ? AND ?";
-      params.push(from, to);
-    }
-
-    const [vehicles] = await pool.query(query, params);
+    const query = "SELECT * FROM vehicles WHERE cron_status IN ('Pending', 'Failed')";
+    const [vehicles] = await pool.query(query);
 
     const apiKey2 = "dmVdeybS8M99rT3PrZ6iw8VZvP5gR6la3wSy2Mld";
     const apiUrl2 = "https://history.mot.api.gov.uk/v1/trade/vehicles/registration";
@@ -189,7 +180,6 @@ const updateAllData2 = async (req, res) => {
     return res.json({
       success: true,
       message: "Cron executed successfully",
-      range: { from, to },
     });
   } catch (error) {
     console.error(error);
