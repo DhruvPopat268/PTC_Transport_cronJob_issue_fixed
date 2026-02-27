@@ -1,9 +1,0 @@
-# Node modules
-node_modules/
-
-# Environment variables
-.env
-
-# Uploads (optional)
-uploads/
-public/uploads/
