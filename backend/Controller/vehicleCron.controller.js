@@ -147,6 +147,11 @@ const updateAllData2 = async (req, res) => {
                 [test.motTestNumber, vehicle.id]
               );
 
+              if (!annualTestRow || annualTestRow.length === 0) {
+                console.log(`⚠️  ${registrationNumber} - Warning: Annual test not found for MOT ${test.motTestNumber}`);
+                continue;
+              }
+
               const annualTestID = annualTestRow[0].id;
 
               // 🛠️ Defects
@@ -174,11 +179,19 @@ const updateAllData2 = async (req, res) => {
 
           console.log(`✅ ${registrationNumber} - Completed: Successfully updated`);
         } catch (err) {
-          console.log(`❌ ${registrationNumber} - Failed: ${err.message}`);
-          await pool.query(
-            "UPDATE vehicles SET cron_status='Failed' WHERE id=?",
-            [vehicle.id]
-          );
+          if (err.response && err.response.status === 404) {
+            console.log(`❌ ${registrationNumber} - Invalid Registration: Not found in DVSA database`);
+            await pool.query(
+              "UPDATE vehicles SET cron_status='Invalid' WHERE id=?",
+              [vehicle.id]
+            );
+          } else {
+            console.log(`❌ ${registrationNumber} - Failed: ${err.message}`);
+            await pool.query(
+              "UPDATE vehicles SET cron_status='Failed' WHERE id=?",
+              [vehicle.id]
+            );
+          }
         }
       }
     }
