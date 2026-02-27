@@ -1,5 +1,5 @@
 const axios = require("axios");
-const pool = require("../database/db");
+const pool = require("../Database/db");
 
 require("dotenv").config();
 
