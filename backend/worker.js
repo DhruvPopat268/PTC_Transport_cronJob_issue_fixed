@@ -49,19 +49,21 @@ async function processVehicles() {
       "SELECT * FROM vehicles WHERE cron_status IN ('Pending', 'Failed')"
     );
 
-    console.log(`📊 Found ${vehicles.length} vehicles to process\n`);
+    console.log(`📊 Fetched ${vehicles.length} vehicles to process\n`);
 
     const apiKey2 = "dmVdeybS8M99rT3PrZ6iw8VZvP5gR6la3wSy2Mld";
     const apiUrl2 = "https://history.mot.api.gov.uk/v1/trade/vehicles/registration";
 
+    let processedCount = 0;
     for (const vehicle of vehicles) {
+      processedCount++;
       const registrationNumber = vehicle.registrations;
       const companyName = vehicle.companyName;
 
       try {
         const accessToken = await getDVSAAccessToken();
         if (!accessToken) {
-          console.log(`❌ ${registrationNumber} - Token generation failed`);
+          console.log(`❌ [${processedCount}/${vehicles.length}] ${registrationNumber} - Token generation failed`);
           await pool.query("UPDATE vehicles SET cron_status='Failed' WHERE id=?", [vehicle.id]);
           await pool.query(
             "INSERT INTO vehicle_process_logs (cron_log_id, vehicle_id, registration_number, status, error_message) VALUES (?,?,?,?,?)",
@@ -81,7 +83,7 @@ async function processVehicles() {
         const resp = response.data;
 
         if (!resp || !resp.registration) {
-          console.log(`❌ ${registrationNumber} - No data returned`);
+          console.log(`❌ [${processedCount}/${vehicles.length}] ${registrationNumber} - No data returned`);
           await pool.query("UPDATE vehicles SET cron_status='Failed' WHERE id=?", [vehicle.id]);
           await pool.query(
             "INSERT INTO vehicle_process_logs (cron_log_id, vehicle_id, registration_number, status, error_message) VALUES (?,?,?,?,?)",
@@ -187,7 +189,7 @@ async function processVehicles() {
           }
         }
 
-        console.log(`✅ ${registrationNumber} - Completed`);
+        console.log(`✅ [${processedCount}/${vehicles.length}] ${registrationNumber} - Completed`);
         await pool.query(
           "INSERT INTO vehicle_process_logs (cron_log_id, vehicle_id, registration_number, status) VALUES (?,?,?,?)",
           [currentCronLogId, vehicle.id, registrationNumber, 'Success']
@@ -195,7 +197,7 @@ async function processVehicles() {
         successCount++;
       } catch (err) {
         if (err.response && err.response.status === 404) {
-          console.log(`❌ ${registrationNumber} - Invalid (404)`);
+          console.log(`❌ [${processedCount}/${vehicles.length}] ${registrationNumber} - Invalid (404)`);
           await pool.query("UPDATE vehicles SET cron_status='Invalid' WHERE id=?", [vehicle.id]);
           await pool.query(
             "INSERT INTO vehicle_process_logs (cron_log_id, vehicle_id, registration_number, status, error_message) VALUES (?,?,?,?,?)",
@@ -203,7 +205,7 @@ async function processVehicles() {
           );
           invalidCount++;
         } else {
-          console.log(`❌ ${registrationNumber} - Failed: ${err.message}`);
+          console.log(`❌ [${processedCount}/${vehicles.length}] ${registrationNumber} - Failed: ${err.message}`);
           await pool.query("UPDATE vehicles SET cron_status='Failed' WHERE id=?", [vehicle.id]);
           await pool.query(
             "INSERT INTO vehicle_process_logs (cron_log_id, vehicle_id, registration_number, status, error_message) VALUES (?,?,?,?,?)",
