@@ -237,12 +237,12 @@ async function processVehicles() {
 }
 
 // Schedule: Every day at 2 AM
-cron.schedule("0 2 * * *", () => {
+cron.schedule(process.env.CRON_SCHEDULE || "0 2 * * *", () => {
   console.log("⏰ Scheduled cron triggered");
   processVehicles();
 });
 
-console.log("✅ Worker started - Scheduled for 2 AM daily");
+console.log(`✅ Worker started - Scheduled: ${process.env.CRON_SCHEDULE || "0 2 * * *"}`);
 
 // Export for manual trigger
 module.exports = { processVehicles };
