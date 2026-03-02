@@ -2,6 +2,7 @@ const express = require('express');
 const db = require('./Database/db');
 const userRoutes = require('./Routes/userRoutes');
 const vehicleCronRoutes = require("./Routes/vehicleCron.routes");
+require('./worker'); // Start background worker
 
 const app = express();
 const PORT = 5000;
